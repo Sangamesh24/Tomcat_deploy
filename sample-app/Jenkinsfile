@@ -1,11 +1,6 @@
 pipeline {
   agent any
 
-  tools {
-    maven 'MAVEN3'   // configured Maven in Jenkins
-    jdk 'JDK17'      // configured JDK in Jenkins
-  }
-
   environment {
     APP_NAME = "sample-app"
     TOMCAT_HOST = "54.226.249.129"   // replace with your server IP
