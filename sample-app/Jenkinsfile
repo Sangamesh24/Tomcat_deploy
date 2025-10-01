@@ -27,7 +27,7 @@ pipeline {
         sshagent(credentials: ['key-ubuntu']) {
           sh '''
             echo "Copying WAR to Tomcat server..."
-            scp -o StrictHostKeyChecking=no tomcat_deploy_job/sample-app/target/*.war ${TOMCAT_USER}@${TOMCAT_HOST}:/opt/tomcat/webapps/${APP_NAME}.war
+            scp -o StrictHostKeyChecking=no /home/ubuntu/workspace/tomcat_deploy_job/sample-app/target/*.war ${TOMCAT_USER}@${TOMCAT_HOST}:/opt/tomcat/webapps/${APP_NAME}.war
           '''
         }
       }
