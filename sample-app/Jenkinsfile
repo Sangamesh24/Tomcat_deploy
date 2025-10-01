@@ -1,0 +1,55 @@
+pipeline {
+  agent any
+
+  tools {
+    maven 'MAVEN3'   // name you configured in Jenkins
+    jdk 'JDK17'      // name you configured
+  }
+
+  environment {
+    TOMCAT_HOST = 'your-tomcat-host-or-ip'   // <-- replace
+    APP_NAME = 'sample-app'
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        git url: 'https://github.com/youruser/your-repo.git', branch: 'main'
+      }
+    }
+
+    stage('Build') {
+      steps {
+        sh 'mvn -B clean package'
+      }
+    }
+
+    stage('Archive artifact') {
+      steps {
+        archiveArtifacts artifacts: 'target/*.war', fingerprint: true
+      }
+    }
+
+    stage('Deploy to Tomcat (Manager API)') {
+      steps {
+        // Use the credentials stored in Jenkins; they are not printed to the log.
+        withCredentials([usernamePassword(credentialsId: 'tomcat-creds',
+                                          usernameVariable: 'TOMCAT_USER',
+                                          passwordVariable: 'TOMCAT_PASS')]) {
+          // Using a single-quoted heredoc prevents Groovy from interpolating secrets:
+          sh '''
+            set +x
+            # upload WAR to Tomcat manager (path is the context path)
+            curl -v --upload-file target/*.war -u "$TOMCAT_USER:$TOMCAT_PASS" \
+              "http://$TOMCAT_HOST:8080/manager/text/deploy?path=/$APP_NAME&update=true"
+          '''
+        }
+      }
+    }
+  }
+
+  post {
+    success { echo 'Pipeline finished: SUCCESS' }
+    failure { echo 'Pipeline finished: FAILURE' }
+  }
+}
