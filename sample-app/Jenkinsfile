@@ -15,11 +15,13 @@ pipeline {
     }
 
     stage('Build WAR') {
-      steps {
-        sh 'mvn clean package -DskipTests'
-      }
+    steps {
+        dir('sample-app') {   // Go inside project folder
+            sh 'mvn clean package -DskipTests'
+        }
     }
-
+}
+    
     stage('Copy WAR to Tomcat server') {
       steps {
         sshagent(credentials: ['key-ubuntu']) {
